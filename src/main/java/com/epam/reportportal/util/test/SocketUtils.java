@@ -56,14 +56,13 @@ public class SocketUtils {
 			BufferedReader in = new BufferedReader(new InputStreamReader(s.getInputStream()));
 			StringBuilder builder = new StringBuilder();
 			String line;
-			do {
-				line = in.readLine();
+			while ((line = in.readLine()) != null) {
 				if (line.equals("")) {
 					break;
 				}
 				builder.append(line);
 				builder.append(System.lineSeparator());
-			} while (true);
+			}
 			String rq = builder.toString();
 			String rs = ofNullable(getClass().getClassLoader().getResourceAsStream(responseFile)).flatMap(s -> {
 				try {
