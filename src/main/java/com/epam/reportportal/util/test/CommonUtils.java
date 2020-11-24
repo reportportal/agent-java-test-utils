@@ -16,8 +16,6 @@
 package com.epam.reportportal.util.test;
 
 import io.reactivex.Maybe;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
@@ -25,7 +23,6 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
 public class CommonUtils {
-	private static final Logger LOGGER = LoggerFactory.getLogger(CommonUtils.class);
 
 	// 20 milliseconds is enough to separate one test from another
 	public static final long MINIMAL_TEST_PAUSE = 20L;

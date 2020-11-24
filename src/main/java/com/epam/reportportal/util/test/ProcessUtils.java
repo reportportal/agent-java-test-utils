@@ -16,11 +16,11 @@
 
 package com.epam.reportportal.util.test;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 import static org.apache.commons.lang3.StringUtils.joinWith;
 
@@ -34,11 +34,12 @@ public class ProcessUtils {
 		}
 	}
 
-	private static String getPathToClass(Class<?> mainClass) {
+	private static String getPathToClass(@Nonnull Class<?> mainClass) {
 		return mainClass.getCanonicalName();
 	}
 
-	public static Process buildProcess(boolean inheritOutput, Class<?> mainClass, String... params) throws IOException {
+	public static Process buildProcess(boolean inheritOutput, @Nonnull Class<?> mainClass,
+			@Nullable Map<String, String> additionalEnvironmentVariables, String... params) throws IOException {
 		String fileSeparator = System.getProperty("file.separator");
 		String javaHome = System.getProperty("java.home");
 		String executablePath = joinWith(fileSeparator, javaHome, "bin", "java");
@@ -60,10 +61,15 @@ public class ProcessUtils {
 		if (inheritOutput) {
 			pb.inheritIO();
 		}
+		Optional.ofNullable(additionalEnvironmentVariables).ifPresent(v -> pb.environment().putAll(v));
 		return pb.start();
 	}
 
 	public static Process buildProcess(Class<?> mainClass, String... params) throws IOException {
-		return buildProcess(false, mainClass, params);
+		return buildProcess(false, mainClass, null, params);
+	}
+
+	public static Process buildProcess(boolean inheritOutput, Class<?> mainClass, String... params) throws IOException {
+		return buildProcess(inheritOutput, mainClass, null, params);
 	}
 }
