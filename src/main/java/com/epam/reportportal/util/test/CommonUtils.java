@@ -19,6 +19,7 @@ import io.reactivex.Maybe;
 
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
@@ -28,6 +29,14 @@ public class CommonUtils {
 	public static final long MINIMAL_TEST_PAUSE = 20L;
 
 	private CommonUtils() {
+	}
+
+	public static ExecutorService testExecutor() {
+		return Executors.newSingleThreadExecutor(r -> {
+			Thread t = new Thread(r);
+			t.setDaemon(true);
+			return t;
+		});
 	}
 
 	public static void shutdownExecutorService(ExecutorService executor) {
