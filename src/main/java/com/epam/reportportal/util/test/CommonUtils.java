@@ -63,13 +63,6 @@ public class CommonUtils {
 	}
 
 	public static Maybe<String> createMaybeUuid() {
-		return createMaybe(UUID.randomUUID().toString());
-	}
-
-	public static <T> Maybe<T> createMaybe(T id) {
-		return Maybe.create(emitter -> {
-			emitter.onSuccess(id);
-			emitter.onComplete();
-		});
+		return Maybe.just(UUID.randomUUID().toString());
 	}
 }
