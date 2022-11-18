@@ -21,7 +21,9 @@ import javax.annotation.Nullable;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
 
+import static java.util.Optional.ofNullable;
 import static org.apache.commons.lang3.StringUtils.joinWith;
 
 public class ProcessUtils {
@@ -39,7 +41,8 @@ public class ProcessUtils {
 	}
 
 	public static Process buildProcess(boolean inheritOutput, @Nonnull Class<?> mainClass,
-			@Nullable Map<String, String> additionalEnvironmentVariables, String... params) throws IOException {
+			@Nullable Map<String, String> additionalEnvironmentVariables,
+			@Nullable Map<String, String> additionSystemVariables, String... params) throws IOException {
 		String fileSeparator = System.getProperty("file.separator");
 		String javaHome = System.getProperty("java.home");
 		String executablePath = joinWith(fileSeparator, javaHome, "bin", "java");
@@ -55,21 +58,30 @@ public class ProcessUtils {
 		paramList.add(executablePath);
 		paramList.add("-classpath");
 		paramList.add(System.getProperty("java.class.path"));
+		paramList.addAll(ofNullable(additionSystemVariables).map(p -> p.entrySet()
+				.stream()
+				.map(e -> "-D" + e.getKey() + "=" + e.getValue())
+				.collect(Collectors.toList())).orElse(Collections.emptyList()));
 		paramList.add(getPathToClass(mainClass));
 		paramList.addAll(Arrays.asList(params));
 		ProcessBuilder pb = new ProcessBuilder(paramList);
 		if (inheritOutput) {
 			pb.inheritIO();
 		}
-		Optional.ofNullable(additionalEnvironmentVariables).ifPresent(v -> pb.environment().putAll(v));
+		ofNullable(additionalEnvironmentVariables).ifPresent(v -> pb.environment().putAll(v));
 		return pb.start();
 	}
 
+	public static Process buildProcess(boolean inheritOutput, @Nonnull Class<?> mainClass,
+			@Nullable Map<String, String> additionalEnvironmentVariables, String... params) throws IOException {
+		return buildProcess(inheritOutput, mainClass, additionalEnvironmentVariables, null, params);
+	}
+
 	public static Process buildProcess(Class<?> mainClass, String... params) throws IOException {
-		return buildProcess(false, mainClass, null, params);
+		return buildProcess(false, mainClass, null, null, params);
 	}
 
 	public static Process buildProcess(boolean inheritOutput, Class<?> mainClass, String... params) throws IOException {
-		return buildProcess(inheritOutput, mainClass, null, params);
+		return buildProcess(inheritOutput, mainClass, null, null, params);
 	}
 }
