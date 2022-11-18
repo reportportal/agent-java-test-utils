@@ -16,17 +16,23 @@
 
 package com.epam.reportportal.util.test;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.tuple.ImmutableTriple;
 import org.apache.commons.lang3.tuple.Triple;
+import org.awaitility.Awaitility;
+import org.awaitility.core.ConditionTimeoutException;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.*;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.lang3.StringUtils.joinWith;
+import static org.hamcrest.Matchers.notNullValue;
 
 public class ProcessUtils {
 	private ProcessUtils() {
@@ -93,5 +99,34 @@ public class ProcessUtils {
 				new BufferedReader(new InputStreamReader(process.getInputStream())),
 				new BufferedReader(new InputStreamReader(process.getErrorStream()))
 		);
+	}
+
+	@SuppressWarnings("unchecked")
+	public static String waitForLine(final BufferedReader reader, final BufferedReader errorReader, final Predicate<String> linePredicate)
+			throws IOException {
+		try {
+			return Awaitility.await("Waiting for a line")
+					.timeout(8, TimeUnit.SECONDS)
+					.pollInterval(100, TimeUnit.MILLISECONDS)
+					.until(() -> {
+						if (!reader.ready()) {
+							return null;
+						}
+						String line;
+						while ((line = reader.readLine()) != null) {
+							if (linePredicate.test(line)) {
+								return line;
+							}
+						}
+						return null;
+					}, notNullValue());
+		} catch (ConditionTimeoutException e) {
+			List<String> errorLines = Collections.EMPTY_LIST;
+			if (errorReader.ready()) {
+				errorLines = IOUtils.readLines(errorReader);
+			}
+			String lineSeparator = System.getProperty("line.separator");
+			throw new IllegalStateException("Unable to run test class: " + String.join(lineSeparator, errorLines));
+		}
 	}
 }
