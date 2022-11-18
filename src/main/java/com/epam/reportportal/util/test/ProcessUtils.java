@@ -101,6 +101,16 @@ public class ProcessUtils {
 		);
 	}
 
+	public static void closeIos(Triple<OutputStreamWriter, BufferedReader, BufferedReader> io) {
+		try {
+			io.getLeft().close();
+			io.getMiddle().close();
+			io.getRight().close();
+		} catch (IOException ignore) {
+
+		}
+	}
+
 	@SuppressWarnings("unchecked")
 	public static String waitForLine(final BufferedReader reader, final BufferedReader errorReader, final Predicate<String> linePredicate)
 			throws IOException {
