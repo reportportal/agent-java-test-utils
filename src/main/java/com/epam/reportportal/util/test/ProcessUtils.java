@@ -16,10 +16,12 @@
 
 package com.epam.reportportal.util.test;
 
+import org.apache.commons.lang3.tuple.ImmutableTriple;
+import org.apache.commons.lang3.tuple.Triple;
+
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -83,5 +85,13 @@ public class ProcessUtils {
 
 	public static Process buildProcess(boolean inheritOutput, Class<?> mainClass, String... params) throws IOException {
 		return buildProcess(inheritOutput, mainClass, null, null, params);
+	}
+
+	public static Triple<OutputStreamWriter, BufferedReader, BufferedReader> getProcessIos(Process process) {
+		return ImmutableTriple.of(
+				new OutputStreamWriter(process.getOutputStream()),
+				new BufferedReader(new InputStreamReader(process.getInputStream())),
+				new BufferedReader(new InputStreamReader(process.getErrorStream()))
+		);
 	}
 }
