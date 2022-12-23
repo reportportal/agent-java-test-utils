@@ -96,7 +96,7 @@ public class ProcessUtils {
 
 	public static Triple<OutputStreamWriter, BufferedReader, BufferedReader> getProcessIos(Process process) {
 		return ImmutableTriple.of(
-				new OutputStreamWriter(process.getOutputStream()),
+				new OutputStreamWriter(process.getOutputStream(), StandardCharsets.UTF_8),
 				new BufferedReader(new InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8)),
 				new BufferedReader(new InputStreamReader(process.getErrorStream(), StandardCharsets.UTF_8))
 		);
