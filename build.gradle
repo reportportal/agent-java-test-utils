@@ -23,9 +23,11 @@ buildscript {
 
 apply plugin: 'java-library'
 
+apply from: "${project.scripts_url}/${project.scripts_branch}/release-commons.gradle"
+apply from: "${project.scripts_url}/${project.scripts_branch}/signing.gradle"
+
 repositories {
     mavenCentral()
-    maven { url 'https://jitpack.io' }
 }
 
 java {
