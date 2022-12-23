@@ -14,13 +14,6 @@
  *  limitations under the License.
  */
 
-
-buildscript {
-    repositories {
-        mavenCentral()
-    }
-}
-
 apply plugin: 'java-library'
 
 apply from: "build-quality.gradle"
