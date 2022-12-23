@@ -23,6 +23,7 @@ buildscript {
 
 apply plugin: 'java-library'
 
+apply from: "build-quality.gradle"
 apply from: "${project.scripts_url}/${project.scripts_branch}/release-commons.gradle"
 apply from: "${project.scripts_url}/${project.scripts_branch}/signing.gradle"
 
@@ -55,4 +56,10 @@ test {
         exceptionFormat = 'full'
     }
     exclude('com/github/reportportal/common/util/test/feature/**')
+}
+
+release {
+    git {
+        requireBranch = 'main'
+    }
 }
