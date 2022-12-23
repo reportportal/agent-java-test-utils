@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.concurrent.*;
 
@@ -53,7 +54,7 @@ public class SocketUtils {
 			if (s == null) {
 				s = ss.accept();
 			}
-			BufferedReader in = new BufferedReader(new InputStreamReader(s.getInputStream()));
+			BufferedReader in = new BufferedReader(new InputStreamReader(s.getInputStream(), StandardCharsets.UTF_8));
 			StringBuilder builder = new StringBuilder();
 			String line;
 			while ((line = in.readLine()) != null) {
