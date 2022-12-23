@@ -25,6 +25,7 @@ import org.awaitility.core.ConditionTimeoutException;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
@@ -95,9 +96,9 @@ public class ProcessUtils {
 
 	public static Triple<OutputStreamWriter, BufferedReader, BufferedReader> getProcessIos(Process process) {
 		return ImmutableTriple.of(
-				new OutputStreamWriter(process.getOutputStream()),
-				new BufferedReader(new InputStreamReader(process.getInputStream())),
-				new BufferedReader(new InputStreamReader(process.getErrorStream()))
+				new OutputStreamWriter(process.getOutputStream(), StandardCharsets.UTF_8),
+				new BufferedReader(new InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8)),
+				new BufferedReader(new InputStreamReader(process.getErrorStream(), StandardCharsets.UTF_8))
 		);
 	}
 
