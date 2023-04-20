@@ -1,6 +1,8 @@
 # Changelog
 
 ## [Unreleased]
+
+## [0.0.2]
 ### Changed
 - SocketUtils class to support multiple answers, by @HardNorth
 
