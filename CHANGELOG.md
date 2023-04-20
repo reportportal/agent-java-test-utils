@@ -4,7 +4,7 @@
 
 ## [0.0.2]
 ### Changed
-- SocketUtils class to support multiple answers
+- SocketUtils class to support multiple answers, by @HardNorth
 
 ## [0.0.1]
 ### Added
