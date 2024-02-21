@@ -1,8 +1,12 @@
 # Changelog
 
 ## [Unreleased]
+### Changed
+- Awaitility and Hamcrest libraries now declared as `implementation`, by @HardNorth
 
 ## [0.0.3]
+### Changed
+- All dependencies are now declared as `compileOnly`, by @HardNorth
 
 ## [0.0.2]
 ### Changed
