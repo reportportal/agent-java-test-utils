@@ -67,7 +67,7 @@ public class SocketUtils {
 				StringBuilder builder = new StringBuilder();
 				String line;
 				while ((line = in.readLine()) != null) {
-					if (line.equals("")) {
+					if (line.isEmpty()) {
 						break;
 					}
 					builder.append(line);

@@ -26,6 +26,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.FileSystems;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
@@ -52,7 +53,7 @@ public class ProcessUtils {
 	public static Process buildProcess(boolean inheritOutput, @Nonnull Class<?> mainClass,
 			@Nullable Map<String, String> additionalEnvironmentVariables,
 			@Nullable Map<String, String> additionSystemVariables, String... params) throws IOException {
-		String fileSeparator = System.getProperty("file.separator");
+		String fileSeparator = FileSystems.getDefault().getSeparator();
 		String javaHome = System.getProperty("java.home");
 		String executablePath = joinWith(fileSeparator, javaHome, "bin", "java");
 		File executableFile = new File(executablePath);
@@ -136,7 +137,7 @@ public class ProcessUtils {
 			if (errorReader.ready()) {
 				errorLines = IOUtils.readLines(errorReader);
 			}
-			String lineSeparator = System.getProperty("line.separator");
+			String lineSeparator = System.lineSeparator();
 			throw new IllegalStateException("Unable to run test class: " + String.join(lineSeparator, errorLines));
 		}
 	}
