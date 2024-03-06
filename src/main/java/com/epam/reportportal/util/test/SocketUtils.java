@@ -96,14 +96,19 @@ public class SocketUtils {
 		return new ServerSocket(0);
 	}
 
-	public static <T> Pair<List<String>, T> executeServerCallable(ServerCallable srvCall, Callable<T> clientCallable) throws Exception {
+	public static <T> Pair<List<String>, T> executeServerCallable(ServerCallable srvCall, Callable<T> clientCallable,
+			long timeoutSeconds) throws Exception {
 		ExecutorService serverExecutor = Executors.newSingleThreadExecutor();
 		Future<List<String>> future = serverExecutor.submit(srvCall);
 		T rs = clientCallable.call();
 		try {
-			return Pair.of(future.get(5, TimeUnit.SECONDS), rs);
+			return Pair.of(future.get(timeoutSeconds, TimeUnit.SECONDS), rs);
 		} finally {
 			CommonUtils.shutdownExecutorService(serverExecutor);
 		}
+	}
+
+	public static <T> Pair<List<String>, T> executeServerCallable(ServerCallable srvCall, Callable<T> clientCallable) throws Exception {
+		return executeServerCallable(srvCall, clientCallable, 5L);
 	}
 }
