@@ -1,6 +1,8 @@
 # Changelog
 
 ## [Unreleased]
+
+## [0.0.4]
 ### Changed
 - Awaitility and Hamcrest libraries now declared as `implementation`, by @HardNorth
 
