@@ -1,6 +1,8 @@
 # Changelog
 
 ## [Unreleased]
+
+## [0.0.5]
 ### Added
 - Additional constructor with `Socket` argument in `SocketUtils.ServerCallable` class, by @HardNorth
 
