@@ -86,7 +86,6 @@ public class SocketUtils {
 						}
 					}).orElseThrow(() -> new IOException("Unable to read file: " + responseFile));
 					IOUtils.write(rs, s.getOutputStream());
-
 				}
 				return results;
 			}
