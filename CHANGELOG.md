@@ -1,6 +1,10 @@
 # Changelog
 
 ## [Unreleased]
+### Removed
+- Constructor with `Socket` argument in `SocketUtils.ServerCallable` class, by @HardNorth
+### Added
+- `Socket` object close after each response chain, by @HardNorth
 
 ## [0.0.5]
 ### Added
