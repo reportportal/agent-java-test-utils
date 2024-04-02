@@ -20,7 +20,6 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.tuple.Pair;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -46,19 +45,12 @@ public class SocketUtils {
 		private final ServerSocket ss;
 		private final Map<String, Object> model;
 		private final List<String> responseFiles;
-		private Socket s;
-
-		public ServerCallable(@Nonnull ServerSocket serverSocket, @Nullable Socket socket, @Nonnull Map<String, Object> replacementValues,
-				@Nonnull List<String> responseFilePaths) {
-			ss = serverSocket;
-			s = socket;
-			model = replacementValues;
-			responseFiles = responseFilePaths;
-		}
 
 		public ServerCallable(@Nonnull ServerSocket serverSocket, @Nonnull Map<String, Object> replacementValues,
 				@Nonnull List<String> responseFilePaths) {
-			this(serverSocket, null, replacementValues, responseFilePaths);
+			ss = serverSocket;
+			model = replacementValues;
+			responseFiles = responseFilePaths;
 		}
 
 		public ServerCallable(@Nonnull ServerSocket serverSocket, @Nonnull Map<String, Object> replacementValues,
@@ -68,37 +60,36 @@ public class SocketUtils {
 
 		@Override
 		public List<String> call() throws Exception {
-			if (s == null) {
-				s = ss.accept();
-			}
-			List<String> results = new ArrayList<>();
-			for (String responseFile : responseFiles) {
-				BufferedReader in = new BufferedReader(new InputStreamReader(s.getInputStream(), StandardCharsets.UTF_8));
-				StringBuilder builder = new StringBuilder();
-				String line;
-				while ((line = in.readLine()) != null) {
-					if (line.isEmpty()) {
-						break;
-					}
-					builder.append(line);
-					builder.append(System.lineSeparator());
-				}
-				results.add(builder.toString());
-				String rs = ofNullable(getClass().getClassLoader().getResourceAsStream(responseFile)).flatMap(s -> {
-					try {
-						String responseStr = IOUtils.toString(s);
-						for (String k : model.keySet()) {
-							responseStr = responseStr.replace("{" + k + "}", model.get(k).toString());
+			try (Socket s = ss.accept()) {
+				List<String> results = new ArrayList<>();
+				for (String responseFile : responseFiles) {
+					BufferedReader in = new BufferedReader(new InputStreamReader(s.getInputStream(), StandardCharsets.UTF_8));
+					StringBuilder builder = new StringBuilder();
+					String line;
+					while ((line = in.readLine()) != null) {
+						if (line.isEmpty()) {
+							break;
 						}
-						return of(responseStr);
-					} catch (IOException ignore) {
-						return empty();
+						builder.append(line);
+						builder.append(System.lineSeparator());
 					}
-				}).orElseThrow(() -> new IOException("Unable to read file: " + responseFile));
-				IOUtils.write(rs, s.getOutputStream());
+					results.add(builder.toString());
+					String rs = ofNullable(getClass().getClassLoader().getResourceAsStream(responseFile)).flatMap(stream -> {
+						try {
+							String responseStr = IOUtils.toString(stream);
+							for (String k : model.keySet()) {
+								responseStr = responseStr.replace("{" + k + "}", model.get(k).toString());
+							}
+							return of(responseStr);
+						} catch (IOException ignore) {
+							return empty();
+						}
+					}).orElseThrow(() -> new IOException("Unable to read file: " + responseFile));
+					IOUtils.write(rs, s.getOutputStream());
 
+				}
+				return results;
 			}
-			return results;
 		}
 	}
 
@@ -106,8 +97,8 @@ public class SocketUtils {
 		return new ServerSocket(0);
 	}
 
-	public static <T> Pair<List<String>, T> executeServerCallable(ServerCallable srvCall, Callable<T> clientCallable,
-			long timeoutSeconds) throws Exception {
+	public static <T> Pair<List<String>, T> executeServerCallable(ServerCallable srvCall, Callable<T> clientCallable, long timeoutSeconds)
+			throws Exception {
 		ExecutorService serverExecutor = Executors.newSingleThreadExecutor();
 		Future<List<String>> future = serverExecutor.submit(srvCall);
 		T rs = clientCallable.call();
