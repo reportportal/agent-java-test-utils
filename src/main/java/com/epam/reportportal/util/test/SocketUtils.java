@@ -19,6 +19,8 @@ package com.epam.reportportal.util.test;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.tuple.Pair;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -46,13 +48,21 @@ public class SocketUtils {
 		private final List<String> responseFiles;
 		private Socket s;
 
-		public ServerCallable(ServerSocket serverSocket, Map<String, Object> replacementValues, List<String> responseFilePaths) {
+		public ServerCallable(@Nonnull ServerSocket serverSocket, @Nullable Socket socket, @Nonnull Map<String, Object> replacementValues,
+				@Nonnull List<String> responseFilePaths) {
 			ss = serverSocket;
+			s = socket;
 			model = replacementValues;
 			responseFiles = responseFilePaths;
 		}
 
-		public ServerCallable(ServerSocket serverSocket, Map<String, Object> replacementValues, String responseFilePath) {
+		public ServerCallable(@Nonnull ServerSocket serverSocket, @Nonnull Map<String, Object> replacementValues,
+				@Nonnull List<String> responseFilePaths) {
+			this(serverSocket, null, replacementValues, responseFilePaths);
+		}
+
+		public ServerCallable(@Nonnull ServerSocket serverSocket, @Nonnull Map<String, Object> replacementValues,
+				@Nonnull String responseFilePath) {
 			this(serverSocket, replacementValues, Collections.singletonList(responseFilePath));
 		}
 
