@@ -1,6 +1,8 @@
 # Changelog
 
 ## [Unreleased]
+
+## [0.0.6]
 ### Removed
 - Constructor with `Socket` argument in `SocketUtils.ServerCallable` class, by @HardNorth
 ### Added
