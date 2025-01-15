@@ -1,6 +1,8 @@
 # Changelog
 
 ## [Unreleased]
+
+## [0.0.7]
 ### Fixed
 - Handle of client exceptions in `SocketUtils.executeServerCallable` method, by @HardNorth
 ### Changed
