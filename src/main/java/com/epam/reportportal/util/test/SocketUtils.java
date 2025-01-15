@@ -76,7 +76,7 @@ public class SocketUtils {
 					results.add(builder.toString());
 					String rs = ofNullable(getClass().getClassLoader().getResourceAsStream(responseFile)).flatMap(stream -> {
 						try {
-							String responseStr = IOUtils.toString(stream);
+							String responseStr = IOUtils.toString(stream, StandardCharsets.UTF_8);
 							for (String k : model.keySet()) {
 								responseStr = responseStr.replace("{" + k + "}", model.get(k).toString());
 							}
@@ -85,7 +85,7 @@ public class SocketUtils {
 							return empty();
 						}
 					}).orElseThrow(() -> new IOException("Unable to read file: " + responseFile));
-					IOUtils.write(rs, s.getOutputStream());
+					IOUtils.write(rs, s.getOutputStream(), StandardCharsets.UTF_8);
 				}
 				return results;
 			}
@@ -98,14 +98,22 @@ public class SocketUtils {
 
 	public static <T> Pair<List<String>, T> executeServerCallable(ServerCallable srvCall, Callable<T> clientCallable, long timeoutSeconds)
 			throws Exception {
+		ExecutorService clientExecutor = Executors.newSingleThreadExecutor();
 		ExecutorService serverExecutor = Executors.newSingleThreadExecutor();
-		Future<List<String>> future = serverExecutor.submit(srvCall);
-		T rs = clientCallable.call();
+		Future<List<String>> serverFuture = serverExecutor.submit(srvCall);
+		Future<T> clientFuture = clientExecutor.submit(clientCallable);
+
+		Pair<List<String>, T> result;
 		try {
-			return Pair.of(future.get(timeoutSeconds, TimeUnit.SECONDS), rs);
-		} finally {
+			result = Pair.of(serverFuture.get(timeoutSeconds, TimeUnit.SECONDS), clientFuture.get(timeoutSeconds, TimeUnit.SECONDS));
+		} catch (TimeoutException e) {
+			CommonUtils.shutdownExecutorService(clientExecutor);
 			CommonUtils.shutdownExecutorService(serverExecutor);
+			throw e;
 		}
+		CommonUtils.shutdownExecutorService(clientExecutor);
+		CommonUtils.shutdownExecutorService(serverExecutor);
+		return result;
 	}
 
 	public static <T> Pair<List<String>, T> executeServerCallable(ServerCallable srvCall, Callable<T> clientCallable) throws Exception {
