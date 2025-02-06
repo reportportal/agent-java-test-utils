@@ -18,6 +18,8 @@ package com.epam.reportportal.util.test;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import java.io.BufferedReader;
@@ -36,6 +38,8 @@ import static java.util.Optional.*;
 
 public class SocketUtils {
 	public static final String WEB_DATE_FORMAT = "EEE, dd MMM yyyy HH:mm:ss z";
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(SocketUtils.class);
 
 	private SocketUtils() {
 	}
@@ -59,36 +63,42 @@ public class SocketUtils {
 		}
 
 		@Override
-		public List<String> call() throws Exception {
-			try (Socket s = ss.accept()) {
-				List<String> results = new ArrayList<>();
-				for (String responseFile : responseFiles) {
-					BufferedReader in = new BufferedReader(new InputStreamReader(s.getInputStream(), StandardCharsets.UTF_8));
-					StringBuilder builder = new StringBuilder();
-					String line;
-					while ((line = in.readLine()) != null) {
-						if (line.isEmpty()) {
-							break;
-						}
-						builder.append(line);
-						builder.append(System.lineSeparator());
+		public List<String> call() throws IOException {
+			final Socket s = ss.accept();
+			final List<String> results = new ArrayList<>();
+			for (String responseFile : responseFiles) {
+				BufferedReader in = new BufferedReader(new InputStreamReader(s.getInputStream(), StandardCharsets.UTF_8));
+				StringBuilder builder = new StringBuilder();
+				String line;
+				while ((line = in.readLine()) != null) {
+					if (line.isEmpty()) {
+						break;
 					}
-					results.add(builder.toString());
-					String rs = ofNullable(getClass().getClassLoader().getResourceAsStream(responseFile)).flatMap(stream -> {
-						try {
-							String responseStr = IOUtils.toString(stream, StandardCharsets.UTF_8);
-							for (String k : model.keySet()) {
-								responseStr = responseStr.replace("{" + k + "}", model.get(k).toString());
-							}
-							return of(responseStr);
-						} catch (IOException ignore) {
-							return empty();
-						}
-					}).orElseThrow(() -> new IOException("Unable to read file: " + responseFile));
-					IOUtils.write(rs, s.getOutputStream(), StandardCharsets.UTF_8);
+					builder.append(line);
+					builder.append(System.lineSeparator());
 				}
-				return results;
+				results.add(builder.toString());
+				String rs = ofNullable(getClass().getClassLoader().getResourceAsStream(responseFile)).flatMap(stream -> {
+					try {
+						String responseStr = IOUtils.toString(stream, StandardCharsets.UTF_8);
+						for (String k : model.keySet()) {
+							responseStr = responseStr.replace("{" + k + "}", model.get(k).toString());
+						}
+						return of(responseStr);
+					} catch (IOException ignore) {
+						return empty();
+					}
+				}).orElseThrow(() -> new IOException("Unable to read file: " + responseFile));
+				IOUtils.write(rs, s.getOutputStream(), StandardCharsets.UTF_8);
 			}
+			if (!ss.isClosed()) {
+				try {
+					ss.close();
+				} catch (IOException e) {
+					LOGGER.warn("Unable to close server socket", e);
+				}
+			}
+			return results;
 		}
 	}
 

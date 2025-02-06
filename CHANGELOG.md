@@ -1,6 +1,8 @@
 # Changelog
 
 ## [Unreleased]
+### Fixed
+- Fix errors on already closed server socket, by @HardNorth
 
 ## [0.0.7]
 ### Fixed
