@@ -1,6 +1,8 @@
 # Changelog
 
 ## [Unreleased]
+### Fixed
+- Another fix for already closed server socket, by @HardNorth
 
 ## [0.0.8]
 ### Fixed
