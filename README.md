@@ -1,4 +1,4 @@
 # agent-java-test-utils
 Common test utilities for java agents
 
-The latest version: 0.0.9.
+The latest version: 0.0.10.
