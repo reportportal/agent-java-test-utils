@@ -40,12 +40,16 @@ public class CommonUtils {
 	}
 
 	public static void shutdownExecutorService(ExecutorService executor) {
+		if (executor == null || executor.isShutdown()) {
+			return;
+		}
 		executor.shutdown();
 		try {
 			if (!executor.awaitTermination(10, TimeUnit.SECONDS)) {
 				executor.shutdownNow();
 			}
 		} catch (InterruptedException ignore) {
+			executor.shutdownNow();
 		}
 	}
 
