@@ -3,6 +3,8 @@
 ## [Unreleased]
 
 ## [0.0.10]
+### Added
+- Check for nullable and already closed executor in `CommonUtils.shutdownExecutorService`, by @HardNorth
 
 ## [0.0.9]
 ### Fixed
