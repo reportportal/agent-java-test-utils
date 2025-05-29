@@ -86,9 +86,9 @@ public class SocketUtils {
 							.trim());
 					if (contentLength > 0) {
 						char[] body = new char[contentLength];
-						int actualREad = in.read(body, 0, contentLength);
-						if (actualREad < contentLength) {
-							throw new IOException("Expected " + contentLength + " bytes, but only read " + actualREad + " bytes");
+						int actualRead = in.read(body, 0, contentLength);
+						if (actualRead < contentLength) {
+							throw new IOException("Expected " + contentLength + " bytes, but only read " + actualRead + " bytes");
 						}
 						builder.append(System.lineSeparator());
 						builder.append(new String(body));
