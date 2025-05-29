@@ -22,9 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
@@ -37,6 +35,7 @@ import java.util.concurrent.*;
 import static java.util.Optional.*;
 
 public class SocketUtils {
+	public static final String CONTENT_LENGTH_HEADER = "Content-Length: ";
 	public static final String WEB_DATE_FORMAT = "EEE, dd MMM yyyy HH:mm:ss z";
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(SocketUtils.class);
@@ -63,41 +62,55 @@ public class SocketUtils {
 		}
 
 		@Override
-		public List<String> call() throws IOException {
-			final Socket s = ss.accept();
+		public List<String> call() throws Exception {
 			final List<String> results = new ArrayList<>();
-			for (String responseFile : responseFiles) {
-				BufferedReader in = new BufferedReader(new InputStreamReader(s.getInputStream(), StandardCharsets.UTF_8));
-				StringBuilder builder = new StringBuilder();
-				String line;
-				while ((line = in.readLine()) != null) {
-					if (line.isEmpty()) {
-						break;
-					}
-					builder.append(line);
-					builder.append(System.lineSeparator());
-				}
-				results.add(builder.toString());
-				String rs = ofNullable(getClass().getClassLoader().getResourceAsStream(responseFile)).flatMap(stream -> {
-					try {
-						String responseStr = IOUtils.toString(stream, StandardCharsets.UTF_8);
-						for (String k : model.keySet()) {
-							responseStr = responseStr.replace("{" + k + "}", model.get(k).toString());
+			try (Socket s = ss.accept(); InputStream is = s.getInputStream(); OutputStream os = s.getOutputStream()) {
+				for (String responseFile : responseFiles) {
+					BufferedReader in = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8));
+					StringBuilder builder = new StringBuilder();
+					while (true) {
+						String line = in.readLine();
+						if (line == null || line.isEmpty()) {
+							break; // End of headers or connection closed
 						}
-						return of(responseStr);
-					} catch (IOException ignore) {
-						return empty();
+						builder.append(line);
+						builder.append(System.lineSeparator());
 					}
-				}).orElseThrow(() -> new IOException("Unable to read file: " + responseFile));
-				IOUtils.write(rs, s.getOutputStream(), StandardCharsets.UTF_8);
-			}
-			if (!s.isClosed()) {
-				try {
-					s.close();
-				} catch (IOException e) {
-					LOGGER.warn("Unable to close server socket", e);
+					String headers = builder.toString();
+					if (headers.isEmpty()) {
+						throw new IOException("No headers received from client");
+					}
+					int lengthIdx =
+							headers.indexOf(CONTENT_LENGTH_HEADER) + CONTENT_LENGTH_HEADER.length(); // Find the Content-Length header
+					int contentLength = Integer.parseInt(headers.substring(lengthIdx, headers.indexOf(System.lineSeparator(), lengthIdx))
+							.trim());
+					if (contentLength > 0) {
+						char[] body = new char[contentLength];
+						int actualREad = in.read(body, 0, contentLength);
+						if (actualREad < contentLength) {
+							throw new IOException("Expected " + contentLength + " bytes, but only read " + actualREad + " bytes");
+						}
+						builder.append(System.lineSeparator());
+						builder.append(new String(body));
+					}
+					results.add(builder.toString());
+
+					String rs = ofNullable(getClass().getClassLoader().getResourceAsStream(responseFile)).flatMap(stream -> {
+						try {
+							String responseStr = IOUtils.toString(stream, StandardCharsets.UTF_8);
+							for (String k : model.keySet()) {
+								responseStr = responseStr.replace("{" + k + "}", model.get(k).toString());
+							}
+							return of(responseStr);
+						} catch (IOException ignore) {
+							return empty();
+						}
+					}).orElseThrow(() -> new IOException("Unable to read file: " + responseFile)).replaceAll("\r?\n", "\r\n");
+					IOUtils.write(rs, os, StandardCharsets.UTF_8);
+					os.flush();
 				}
 			}
+
 			return results;
 		}
 	}
