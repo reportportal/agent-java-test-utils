@@ -1,6 +1,8 @@
 # Changelog
 
 ## [Unreleased]
+### Fixed
+- No body request handling in `SocketUtils.ServerCallable`, by @HardNorth
 
 ## [0.0.11]
 ### Fixed

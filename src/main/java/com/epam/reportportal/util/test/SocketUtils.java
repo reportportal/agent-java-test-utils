@@ -80,10 +80,14 @@ public class SocketUtils {
 					if (headers.isEmpty()) {
 						throw new IOException("No headers received from client");
 					}
-					int lengthIdx =
-							headers.indexOf(CONTENT_LENGTH_HEADER) + CONTENT_LENGTH_HEADER.length(); // Find the Content-Length header
-					int contentLength = Integer.parseInt(headers.substring(lengthIdx, headers.indexOf(System.lineSeparator(), lengthIdx))
-							.trim());
+
+					int contentLength = 0;
+					int lengthIdx = headers.indexOf(CONTENT_LENGTH_HEADER);
+					if (lengthIdx > 0) {
+						lengthIdx += CONTENT_LENGTH_HEADER.length();
+						contentLength = Integer.parseInt(headers.substring(lengthIdx, headers.indexOf(System.lineSeparator(), lengthIdx))
+								.trim());
+					}
 					if (contentLength > 0) {
 						char[] body = new char[contentLength];
 						int actualRead = in.read(body, 0, contentLength);
