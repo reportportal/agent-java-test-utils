@@ -3,6 +3,10 @@
 ## [Unreleased]
 
 ## [0.0.10]
+### Fixed
+- Handling of multiple responses in `SocketUtils.ServerCallable`, by @HardNorth
+### Added
+- Check for nullable and already closed executor in `CommonUtils.shutdownExecutorService`, by @HardNorth
 
 ## [0.0.9]
 ### Fixed
