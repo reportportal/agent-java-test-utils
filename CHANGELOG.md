@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.0.11]
+
 ## [0.0.10]
 ### Fixed
 - Handling of multiple responses in `SocketUtils.ServerCallable`, by @HardNorth
