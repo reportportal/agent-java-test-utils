@@ -1,6 +1,8 @@
 # Changelog
 
 ## [Unreleased]
+### Changed
+- `hamcrest-core` dependency replaced with `hamcrest`, by @HardNorth
 
 ## [0.0.12]
 ### Fixed
