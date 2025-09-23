@@ -1,6 +1,12 @@
 # Changelog
 
 ## [Unreleased]
+### Added
+- Auto-closeable `CommonUtils.ExecutorService` for easier resource management, by @HardNorth
+### Changed
+- Replace "jsr305" with "jakarta.annotation-api", by @HardNorth
+### Removed
+- Java 8-10 support, by @HardNorth
 
 ## [0.0.13]
 ### Changed
