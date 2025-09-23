@@ -1,6 +1,8 @@
 # Changelog
 
 ## [Unreleased]
+
+## [0.1.0]
 ### Added
 - Auto-closeable `CommonUtils.ExecutorService` for easier resource management, by @HardNorth
 ### Changed
