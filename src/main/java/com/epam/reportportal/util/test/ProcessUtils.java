@@ -16,14 +16,14 @@
 
 package com.epam.reportportal.util.test;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.tuple.ImmutableTriple;
 import org.apache.commons.lang3.tuple.Triple;
 import org.awaitility.Awaitility;
 import org.awaitility.core.ConditionTimeoutException;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.FileSystems;
@@ -36,6 +36,7 @@ import static java.util.Optional.ofNullable;
 import static org.apache.commons.lang3.StringUtils.joinWith;
 import static org.hamcrest.Matchers.notNullValue;
 
+@SuppressWarnings("unused")
 public class ProcessUtils {
 	private ProcessUtils() {
 	}
@@ -51,8 +52,8 @@ public class ProcessUtils {
 	}
 
 	public static Process buildProcess(boolean inheritOutput, @Nonnull Class<?> mainClass,
-			@Nullable Map<String, String> additionalEnvironmentVariables,
-			@Nullable Map<String, String> additionSystemVariables, String... params) throws IOException {
+			@Nullable Map<String, String> additionalEnvironmentVariables, @Nullable Map<String, String> additionSystemVariables,
+			String... params) throws IOException {
 		String fileSeparator = FileSystems.getDefault().getSeparator();
 		String javaHome = System.getProperty("java.home");
 		String executablePath = joinWith(fileSeparator, javaHome, "bin", "java");
@@ -117,10 +118,8 @@ public class ProcessUtils {
 	public static String waitForLine(final BufferedReader reader, final BufferedReader errorReader, final Predicate<String> linePredicate)
 			throws IOException {
 		try {
-			return Awaitility.await("Waiting for a line")
-					.timeout(8, TimeUnit.SECONDS)
-					.pollInterval(100, TimeUnit.MILLISECONDS)
-					.until(() -> {
+			return Awaitility.await("Waiting for a line").timeout(8, TimeUnit.SECONDS).pollInterval(100, TimeUnit.MILLISECONDS).until(
+					() -> {
 						if (!reader.ready()) {
 							return null;
 						}
@@ -131,7 +130,8 @@ public class ProcessUtils {
 							}
 						}
 						return null;
-					}, notNullValue());
+					}, notNullValue()
+			);
 		} catch (ConditionTimeoutException e) {
 			List<String> errorLines = Collections.EMPTY_LIST;
 			if (errorReader.ready()) {

@@ -16,12 +16,12 @@
 
 package com.epam.reportportal.util.test;
 
+import jakarta.annotation.Nonnull;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nonnull;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -34,6 +34,7 @@ import java.util.concurrent.*;
 
 import static java.util.Optional.*;
 
+@SuppressWarnings("unused")
 public class SocketUtils {
 	public static final String CONTENT_LENGTH_HEADER = "Content-Length: ";
 	public static final String WEB_DATE_FORMAT = "EEE, dd MMM yyyy HH:mm:ss z";

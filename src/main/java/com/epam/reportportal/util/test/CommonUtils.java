@@ -16,30 +16,128 @@
 package com.epam.reportportal.util.test;
 
 import io.reactivex.Maybe;
+import jakarta.annotation.Nonnull;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadLocalRandom;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
+@SuppressWarnings("unused")
 public class CommonUtils {
 
 	// 20 milliseconds is enough to separate one test from another
 	public static final long MINIMAL_TEST_PAUSE = 20L;
 
+	public static class ExecutorService implements java.util.concurrent.ExecutorService, AutoCloseable {
+		private final java.util.concurrent.ExecutorService delegate;
+
+		public ExecutorService(java.util.concurrent.ExecutorService delegate) {
+			this.delegate = delegate;
+		}
+
+		@Override
+		public void shutdown() {
+			delegate.shutdown();
+		}
+
+		@Override
+		@Nonnull
+		public List<Runnable> shutdownNow() {
+			return delegate.shutdownNow();
+		}
+
+		@Override
+		public boolean isShutdown() {
+			return delegate.isShutdown();
+		}
+
+		@Override
+		public boolean isTerminated() {
+			return delegate.isTerminated();
+		}
+
+		@Override
+		public boolean awaitTermination(long timeout, @Nonnull TimeUnit unit) throws InterruptedException {
+			return delegate.awaitTermination(timeout, unit);
+		}
+
+		@Override
+		@Nonnull
+		public <T> Future<T> submit(@Nonnull Callable<T> task) {
+			return delegate.submit(task);
+		}
+
+		@Override
+		@Nonnull
+		public <T> Future<T> submit(@Nonnull Runnable task, T result) {
+			return delegate.submit(task, result);
+		}
+
+		@Override
+		@Nonnull
+		public Future<?> submit(@Nonnull Runnable task) {
+			return delegate.submit(task);
+		}
+
+		@Override
+		@Nonnull
+		public <T> List<Future<T>> invokeAll(@Nonnull Collection<? extends Callable<T>> tasks) throws InterruptedException {
+			return delegate.invokeAll(tasks);
+		}
+
+		@Override
+		@Nonnull
+		public <T> List<Future<T>> invokeAll(@Nonnull Collection<? extends Callable<T>> tasks, long timeout, @Nonnull TimeUnit unit)
+				throws InterruptedException {
+			return delegate.invokeAll(tasks, timeout, unit);
+		}
+
+		@Override
+		@Nonnull
+		public <T> T invokeAny(@Nonnull Collection<? extends Callable<T>> tasks) throws InterruptedException, ExecutionException {
+			return delegate.invokeAny(tasks);
+		}
+
+		@Override
+		public <T> T invokeAny(@Nonnull Collection<? extends Callable<T>> tasks, long timeout, @Nonnull TimeUnit unit)
+				throws InterruptedException, ExecutionException, TimeoutException {
+			return delegate.invokeAny(tasks, timeout, unit);
+		}
+
+		@Override
+		public void execute(@Nonnull Runnable command) {
+			delegate.execute(command);
+		}
+
+		@Override
+		public void close() {
+			CommonUtils.shutdownExecutorService(delegate);
+		}
+	}
+
 	private CommonUtils() {
 	}
 
 	public static ExecutorService testExecutor() {
-		return Executors.newSingleThreadExecutor(r -> {
-			Thread t = new Thread(r);
+		return new ExecutorService(Executors.newSingleThreadExecutor(r -> {
+			Thread t = Executors.defaultThreadFactory().newThread(r);
 			t.setDaemon(true);
 			return t;
-		});
+		}));
 	}
 
-	public static void shutdownExecutorService(ExecutorService executor) {
+	public static ExecutorService testExecutor(final int threadNum) {
+		return new ExecutorService(Executors.newFixedThreadPool(
+				threadNum, r -> {
+					Thread t = Executors.defaultThreadFactory().newThread(r);
+					t.setDaemon(true);
+					return t;
+				}
+		));
+	}
+
+	public static <T extends java.util.concurrent.ExecutorService> void shutdownExecutorService(T executor) {
 		if (executor == null || executor.isShutdown()) {
 			return;
 		}
